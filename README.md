@@ -13,6 +13,7 @@
 4. 除外部依赖的必要类名外，不使用无前缀的自定义 Class。Bootstrap、Swiper、WordPress 自动生成/规定的类名应保留，不要批量重命名。
 5. 迁移或复制组件时，如果与另一种组件编号冲突，可仅在组件代码范围内把 `s01` 批量替换为 `s08`，同步检查 HTML、CSS、JS；相同组件的多个实例可以共用一个 Scope Class。
 6. Scope Class 可重复使用；仅在锚点、表单、ARIA 等确需唯一标识时添加 ID（如 `<section class="s01" id="about">`），并按第 2.1 节和多实例规则处理。
+7. `sNN` 编号只用于简短标识，不表达业务含义；复杂页面可用 HTML 注释或可选 `data-scope` 记录区域用途，不作为 CSS 或 JS 的默认查询入口。
 
 ## 2. 基本写法
 
@@ -87,6 +88,19 @@
 - **ID 不参与 Scope 编号，也不作为常规 CSS 选择器**：不要把 `id="s01"` 与 `class="s01"` 捆绑，也不必为了样式给每个组件设置 ID。
 - **同一页面内 ID 不能重复**：复制 Section 到同一页面时，保留共同的 `class="s01"`，但应删除不需要的 ID，或为不同锚点设置不同 ID（例如 `about`、`about-team`）；同时检查所有指向这些 ID 的链接和关联属性。
 - **ID 尽量使用有意义的英文名称**：如 `about`、`products`、`contact`；如果没有锚点或关联需求，就省略 ID。
+
+### 2.2 可选语义说明
+
+当一个页面存在较多 Scope，`s01`、`s02` 等编号可能不容易辨认。可使用 HTML 注释说明用途，或按需增加 `data-scope` 属性：
+
+```html
+<!-- About Section -->
+<section class="s01" id="about" data-scope="about-section">
+  <h2 class="s01-title">About Us</h2>
+</section>
+```
+
+`data-scope="about-section"` 仅用于辅助阅读和维护，**不强制添加，也不参与默认 CSS 选择器和 JS 交互查询**。简单页面只使用注释即可；不要为了标记语义再建立一套复杂命名体系。
 
 ## 3. 推荐短名称
 
@@ -215,6 +229,10 @@
 - **不使用 `!important` 作为默认解决方案**；遇到冲突先检查开发者工具中的实际生效规则与层叠顺序。
 - **可兼容 Bootstrap 网格**：可以使用官方 `.container`、`.row`、`.col-*` 等类，但这些是有意引入的外部依赖；希望完全独立迁移时，优先使用组件自身的 Grid/Flex 布局。
 - **不要擅自覆盖第三方结构类**，包括 `.swiper-slide`、`.wp-block-*` 等；有需要时在根作用域内精确调整。
+
+**Bootstrap 5 工具类注意：**部分工具类（如 `.text-center`、`.mt-3`）的声明带有 `!important`。当这些类与 `.s01-title` 等组件样式作用于同一元素时，工具类可能覆盖组件声明；需要时应调整类名使用位置或检查浏览器开发者工具中的实际级联结果，不要为了争夺优先级而随意叠加 `!important`。
+
+**现代 CSS 说明：**`@scope` 和 `@layer` 可在适当环境下辅助管理作用域及级联，但本规范不要求使用。默认继续采用 `.sNN .sNN-name`，保证开发与迁移规则一致。
 
 ## 5. JavaScript 与多实例
 
