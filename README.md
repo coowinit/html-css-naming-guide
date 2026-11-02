@@ -12,7 +12,7 @@
 3. 该区域的自定义 CSS 选择器以 `.sNN` 为作用域入口，内部样式优先写成 `.s01 .s01-title`；禁止直接写全局 `.title`、`.card`、`h2` 等规则。
 4. 除外部依赖的必要类名外，不使用无前缀的自定义 Class。Bootstrap、Swiper、WordPress 自动生成/规定的类名应保留，不要批量重命名。
 5. 迁移或复制组件时，如果与另一种组件编号冲突，可仅在组件代码范围内把 `s01` 批量替换为 `s08`，同步检查 HTML、CSS、JS；相同组件的多个实例可以共用一个 Scope Class。
-6. Scope Class 可重复使用；仅在锚点、表单、ARIA 等确需唯一标识时添加 ID，并按下文的多实例规则处理。
+6. Scope Class 可重复使用；仅在锚点、表单、ARIA 等确需唯一标识时添加 ID（如 `<section class="s01" id="about">`），并按第 2.1 节和多实例规则处理。
 
 ## 2. 基本写法
 
@@ -70,7 +70,23 @@
 }
 ```
 
-**规则要点：** 一个独立区域一个 Scope；内部 Class 的 `sNN-` 与根 Class 保持一致；优先使用单层、短选择器，不必写 `.s01 .s01-inner .s01-content .s01-title`。
+**规则要点：** 一种独立区域对应一个 Scope Class；内部 Class 的 `sNN-` 与根 Class 保持一致；优先使用单层、短选择器，不必写 `.s01 .s01-inner .s01-content .s01-title`。
+
+### 2.1 Class 与 ID 的分工
+
+```html
+<section class="s01" id="about">
+  <h2 class="s01-title">About Us</h2>
+</section>
+
+<a href="#about">跳转到 About Us</a>
+```
+
+- **`class="s01"` 是样式作用域（必需）**：CSS 使用 `.s01`、`.s01 .s01-title`，同一种组件的多个实例可以共享这个 Class。
+- **`id="about"` 是唯一标识（按需）**：需要页内锚点时使用 `href="#about"`；表单标签或 ARIA 属性需要关联元素时，也可使用对应的唯一 ID。
+- **ID 不参与 Scope 编号，也不作为常规 CSS 选择器**：不要把 `id="s01"` 与 `class="s01"` 捆绑，也不必为了样式给每个组件设置 ID。
+- **同一页面内 ID 不能重复**：复制 Section 到同一页面时，保留共同的 `class="s01"`，但应删除不需要的 ID，或为不同锚点设置不同 ID（例如 `about`、`about-team`）；同时检查所有指向这些 ID 的链接和关联属性。
+- **ID 尽量使用有意义的英文名称**：如 `about`、`products`、`contact`；如果没有锚点或关联需求，就省略 ID。
 
 ## 3. 推荐短名称
 
@@ -244,7 +260,7 @@ document.querySelectorAll('.s02[data-js="gallery"]').forEach((root) => {
 - [ ] 名称是否简短可读，无无意义的多层选择器？
 - [ ] 是否保留了 Bootstrap / WordPress / Swiper 必需的类名？
 - [ ] 是否显式设置关键视觉属性，而非假设宿主的默认 CSS？
-- [ ] 功能性 ID 是否唯一？JS 是否按实例查询并避免重复初始化？
+- [ ] 如设置 `id`，是否确有锚点/关联用途、名称清晰且在页面中唯一？JS 是否按实例查询并避免重复初始化？
 - [ ] 更换 `sNN` 后，是否无需大量调整内部结构即可迁移？
 
 ---
