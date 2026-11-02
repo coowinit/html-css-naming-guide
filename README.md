@@ -212,6 +212,21 @@
 | `hidden` | 隐藏状态 | 需配合实际隐藏规则及无障碍处理 |
 | `empty` | 空内容状态 | 无数据提示 |
 
+**状态类写法（推荐）：** 自定义状态继续使用相同 Scope 前缀，例如 `s01-active`、`s01-open`、`s01-loading`。只在当前组件范围内组合使用，不额外引入全局 `is-*` / `has-*` 类名。
+
+```html
+<button class="s01-btn s01-active" type="button">Selected</button>
+```
+
+```css
+.s01 .s01-btn.s01-active {
+  background: #333;
+  color: #fff;
+}
+```
+
+需要禁用原生控件时，仍应设置真实的 `disabled` 属性；必要时配合 `aria-expanded`、`aria-selected` 等语义状态，不要只依赖视觉状态 Class。
+
 **使用提醒：**
 
 - 上表的 `row`、`col`、`card`、`btn`、`nav`、`badge` 等，也是 Bootstrap 常见的完整类名；**自定义时只能写 `s01-row`、`s01-card` 等**，除非明确需要同时使用框架类。
@@ -234,20 +249,34 @@
 
 **现代 CSS 说明：**`@scope` 和 `@layer` 可在适当环境下辅助管理作用域及级联，但本规范不要求使用。默认继续采用 `.sNN .sNN-name`，保证开发与迁移规则一致。
 
+**CSS 变量（可选）：** 当组件的颜色、字号、间距等需要跨站调整时，可在 Scope 根节点集中定义带编号前缀的变量；简单且固定的样式直接声明即可，无需全部变量化。
+
+```css
+.s01 {
+  --s01-gap: 32px;
+  --s01-title-size: 32px;
+}
+
+.s01 .s01-inner { gap: var(--s01-gap); }
+.s01 .s01-title { font-size: var(--s01-title-size); }
+```
+
+外部定制时，可在合适的加载顺序和选择器特异性下覆盖这些变量；它们并非自动免疫 CSS 级联。
+
 ## 5. JavaScript 与多实例
 
-JS 尽量先定位该作用域根节点，再在内部查询目标；可用自定义 `data-*` 属性作为交互钩子，不要依赖页面全局 `.title` 等选择器：
+JS 尽量先定位该作用域根节点，再在内部查询目标；使用 `data-js="组件名"` 标识组件根节点，使用 `data-js-action="动作名"` 标识内部交互元素，不要依赖页面全局 `.title` 等选择器：
 
 ```html
 <div class="s02" data-js="gallery">
-  <button class="s02-next" data-action="next" type="button">Next</button>
+  <button class="s02-next" data-js-action="next" type="button">Next</button>
 </div>
 ```
 
 ```js
 document.querySelectorAll('.s02[data-js="gallery"]').forEach((root) => {
   if (root.dataset.initialized === 'true') return;
-  const next = root.querySelector('[data-action="next"]');
+  const next = root.querySelector('[data-js-action="next"]');
   if (!next) return;
   next.addEventListener('click', () => {
     // 只操作当前 Scope 实例内的内容
